@@ -1,0 +1,46 @@
+---
+########################################################
+# Author: 		Leonardo A. de Araujo	       #
+# Create: 		06/01/2019		       #
+# Email:  		leo.alvesdearaujo@gmail.com    #
+# Company:	 	Red Hat			       #
+########################################################
+
+- hosts: etcd
+  name: Health Status for ETCD Openshift
+  gather_facts: no
+  tasks:
+
+  - name: "Etcd Member List"
+    shell: /bin/sh -c "ETCDCTL_API=3 etcdctl --cert /etc/etcd/peer.crt --key /etc/etcd/peer.key --cacert /etc/etcd/ca.crt --endpoints https://`hostname`:2379 -w table member list"
+    register: member_list
+  - debug:
+      msg: "{{ member_list.stdout.split('\n') }}"
+
+
+  - name: "Etcd Endpoint Status"
+    shell: /bin/sh -c "ETCDCTL_API=3 etcdctl --cert /etc/etcd/peer.crt --key /etc/etcd/peer.key --cacert /etc/etcd/ca.crt --endpoints https://`hostname`:2379 -w table endpoint status"
+    register: endpoint_status
+  - debug:
+      msg: "{{ endpoint_status.stdout.split('\n') }}"
+
+
+  - name: "Etcd Cluster Health"
+    shell: /bin/sh -c "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt --endpoints https://`hostname`:2379 -o json cluster-health"
+    register: cluster_health
+  - debug:
+      msg: "{{ cluster_health.stdout.split('\n') }}"
+
+
+  - name: "Etcd Check Performance"
+    shell: /bin/sh -c "ETCDCTL_API=3 etcdctl --cert /etc/etcd/peer.crt --key /etc/etcd/peer.key --cacert /etc/etcd/ca.crt --endpoints https://`hostname`:2379 -w table check perf --load=s"
+    register: check_perform
+  - debug:
+      msg: "{{ check_perform.stdout.split('\n') }}"
+
+
+  - name: "Etcd Journalctl"
+    shell: "journalctl -u etcd.service --no-pager | tail -n25"
+    register: journalctl_logs
+  - debug:
+      msg: "{{ journalctl_logs.stdout.split('\n') }}"
