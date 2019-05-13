@@ -1,4 +1,10 @@
 ---
+########################################################
+# Author: 		Leonardo A. de Araujo	       #
+# Create: 		20/04/2019		       #
+# Email:  		leo.alvesdearaujo@gmail.com    #
+# Company:	 	Red Hat			       #
+########################################################
 # Como executar:
 # Ex.: ansible-playbook ovs.yaml -e "pod=ovs-xxx"
 - hosts: localhost
