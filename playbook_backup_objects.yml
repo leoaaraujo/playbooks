@@ -1,0 +1,60 @@
+---
+- name: Openshift - Backup Objects
+  hosts: localhost
+  gather_facts: no
+  vars:
+    objects:
+      - rolebindings
+      - serviceaccounts
+      - secrets
+      - imagestreamtags
+      - cm
+      - egressnetworkpolicies
+      - rolebindingrestrictions
+      - limitranges
+      - resourcequotas
+      - dc
+      - ds
+      - pv
+      - pvc
+      - templates
+      - cronjobs
+      - statefulsets
+      - hpa
+      - deployments
+      - replicasets
+      - poddisruptionbudget
+      - endpoints
+      - oauthclient
+      - route
+      - rc
+      - is
+      - networkpolicies
+      - podpreset
+
+  tasks:
+
+  - name: "Generate list of projects"
+    shell: oc get projects | awk '{print $1}' | grep -v NAME
+    ignore_errors: yes
+    changed_when: false
+    register: projects
+    run_once: true
+  - set_fact:
+      projects={{ projects.stdout_lines }}
+
+  - name: "Define data variable"
+    shell: date '+%Y%m%d'
+    ignore_errors: yes
+    register: data
+
+  - name: "Create backup dir"
+    file:
+      dest: "/tmp/backup-objects-{{ data.stdout }}"
+      state: directory
+
+  - name: Openshift - Export Objects
+    shell:  oc -n {{ item.0 }} get --export {{ item.1 }} -o yaml > /tmp/backup-objects-{{ data.stdout }}/{{ item.0 }}-{{ item.1 }}.yaml
+    with_nested:
+      - "{{ projects }}"
+      - "{{ objects }}"
