@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+    - name: Example Task Debug
+      debug:
+        msg: "Playbook Executado com Sucesso"
